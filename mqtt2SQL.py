@@ -6,14 +6,21 @@
 import paho.mqtt.client as mqtt
 import mysql.connector
 import json
-
+import os
 
 # =========================
-# SQL CONNECTION INFOS
+# ENV VARIABLES
 # =========================
 
-#IMPORTANT TO DETERMINE IF SENDING DATA TO THE CORRECT DB
-database="mydb" 
+MQTT_BROKER=os.getenv("MQTT_BROKER") # CONST BROKER IP ADDR
+MQTT_TOPIC=os.getenv("MQTT_TOPIC") # CONST TOPIC TO SUB
+MQTT_PORT=os.getenv("MQTT_PORT") # CONST BROKER PORT
+SQL_SERVER=os.getenv("SQL_SERVER") # CONST SQL IP ADDR
+SQL_PORT=os.getenv("SQL_PORT") # CONST SQL PORT
+SQL_DB=os.getenv("SQL_DB") # CONST SQL DATABASE FOR CHECK
+SQL_USER=os.getenv("SQL_USER") # CONST SQL USER
+SQL_PASSWORD=os.getenv("SQL_PASSWORD") # CONST SQL PASSWORD
+SQL_SECRET=os.getenv("SQL_SECRET") # CONST PATH TO SECRET FILE (WIP)
 
 # =========================
 # MQTT CALLBACKS
@@ -24,7 +31,7 @@ This is where it will subscribed to the topics we want to received and send to t
 '''
 def on_connect(client, userdata, flags, rc):
     print("MQTT connected with code", rc)
-    client.subscribe("localhost/sql")
+    client.subscribe(MQTT_TOPIC)
 
 '''
 ON_MESSAGE is the callback function when we received a message from a subscribed topic
@@ -34,17 +41,17 @@ It open a cursor (to execute the insert), process the information to put it in a
 def on_message(client, userdata, msg):
     
     mydb = mysql.connector.connect(
-        host="172.19.0.2",
-        user="root",
-        password="rootpassword",
-        database="mydb"
+        host=SQL_SERVER,
+        user=SQL_USER,
+        password=SQL_PASSWORD,
+        database=SQL_DB
     )
     cursor = mydb.cursor()
     
     payload = json.loads(msg.payload.decode())
     print(f"MQTT message: {payload}")
     
-    if payload["database"]== database:
+    if payload["database"]== SQL_DB:
         request = create_request(payload["table"],payload["data"])
         print(request)
         cursor.execute(request)
@@ -98,5 +105,5 @@ client = mqtt.Client()
 client.on_connect = on_connect
 client.on_message = on_message
 
-client.connect("192.168.0.10", 1883, 60)
+client.connect(MQTT_BROKER, MQTT_PORT, 60)
 client.loop_forever()
