@@ -1,6 +1,6 @@
 # MQTT Connector to SQL
 # VICTOR CASTHELAIN - 2026
-# version 1.0.0
+# version 1.0.1
 
 # IMPORTS
 import paho.mqtt.client as mqtt
