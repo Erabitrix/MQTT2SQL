@@ -1,6 +1,6 @@
 # MQTT Connector to SQL
 # VICTOR CASTHELAIN - 2026
-# version 1.0.1
+# version 1.0.2
 
 # IMPORTS
 import paho.mqtt.client as mqtt
@@ -14,13 +14,23 @@ import os
 
 MQTT_BROKER=os.getenv("MQTT_BROKER") # CONST BROKER IP ADDR
 MQTT_TOPIC=os.getenv("MQTT_TOPIC") # CONST TOPIC TO SUB
-MQTT_PORT=os.getenv("MQTT_PORT") # CONST BROKER PORT
+MQTT_PORT=int(os.getenv("MQTT_PORT")) # CONST BROKER PORT
 SQL_SERVER=os.getenv("SQL_SERVER") # CONST SQL IP ADDR
 SQL_PORT=os.getenv("SQL_PORT") # CONST SQL PORT
 SQL_DB=os.getenv("SQL_DB") # CONST SQL DATABASE FOR CHECK
 SQL_USER=os.getenv("SQL_USER") # CONST SQL USER
 SQL_PASSWORD=os.getenv("SQL_PASSWORD") # CONST SQL PASSWORD
 SQL_SECRET=os.getenv("SQL_SECRET") # CONST PATH TO SECRET FILE (WIP)
+
+print(MQTT_BROKER)
+print(MQTT_TOPIC)
+print(MQTT_PORT)
+print(SQL_SERVER)
+print(SQL_PORT)
+print(SQL_DB)
+print(SQL_USER)
+print(SQL_PASSWORD)
+print(SQL_SECRET)
 
 # =========================
 # MQTT CALLBACKS
@@ -31,7 +41,7 @@ This is where it will subscribed to the topics we want to received and send to t
 '''
 def on_connect(client, userdata, flags, rc):
     print("MQTT connected with code", rc)
-    client.subscribe(MQTT_TOPIC)
+    client.subscribe("localhost/sql")
 
 '''
 ON_MESSAGE is the callback function when we received a message from a subscribed topic
@@ -39,6 +49,9 @@ When it received a message, it first open a connection to the db. then if the co
 It open a cursor (to execute the insert), process the information to put it in a SQL insert request
 '''
 def on_message(client, userdata, msg):
+    print("Message received")    
+    payload = json.loads(msg.payload.decode())
+    print(f"MQTT message: {payload}")
     
     mydb = mysql.connector.connect(
         host=SQL_SERVER,
@@ -47,9 +60,6 @@ def on_message(client, userdata, msg):
         database=SQL_DB
     )
     cursor = mydb.cursor()
-    
-    payload = json.loads(msg.payload.decode())
-    print(f"MQTT message: {payload}")
     
     if payload["database"]== SQL_DB:
         request = create_request(payload["table"],payload["data"])
