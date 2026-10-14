@@ -12,14 +12,14 @@ import os
 # ENV VARIABLES
 # =========================
 
-MQTT_BROKER=os.getenv("MQTT_BROKER") # CONST BROKER IP ADDR
-MQTT_TOPIC=os.getenv("MQTT_TOPIC") # CONST TOPIC TO SUB
-MQTT_PORT=int(os.getenv("MQTT_PORT")) # CONST BROKER PORT
-SQL_SERVER=os.getenv("SQL_SERVER") # CONST SQL IP ADDR
-SQL_PORT=os.getenv("SQL_PORT") # CONST SQL PORT
-SQL_DB=os.getenv("SQL_DB") # CONST SQL DATABASE FOR CHECK
-SQL_USER=os.getenv("SQL_USER") # CONST SQL USER
-SQL_PASSWORD=os.getenv("SQL_PASSWORD") # CONST SQL PASSWORD
+MQTT_BROKER=os.getenv("MQTT_BROKER","localhost") # CONST BROKER IP ADDR
+MQTT_TOPIC=os.getenv("MQTT_TOPIC","localhost/sql") # CONST TOPIC TO SUB
+MQTT_PORT=int(os.getenv("MQTT_PORT",1883)) # CONST BROKER PORT
+SQL_SERVER=os.getenv("SQL_SERVER","127.0.0.1") # CONST SQL IP ADDR
+SQL_PORT=os.getenv("SQL_PORT","1433") # CONST SQL PORT
+SQL_DB=os.getenv("SQL_DB","my_database") # CONST SQL DATABASE FOR CHECK
+SQL_USER=os.getenv("SQL_USER","sa") # CONST SQL USER
+SQL_PASSWORD=os.getenv("SQL_PASSWORD","password") # CONST SQL PASSWORD
 SQL_SECRET=os.getenv("SQL_SECRET") # CONST PATH TO SECRET FILE (WIP)
 
 print(MQTT_BROKER)
@@ -41,7 +41,7 @@ This is where it will subscribed to the topics we want to received and send to t
 '''
 def on_connect(client, userdata, flags, rc):
     print("MQTT connected with code", rc)
-    client.subscribe("localhost/sql")
+    client.subscribe(MQTT_TOPIC)
 
 '''
 ON_MESSAGE is the callback function when we received a message from a subscribed topic
