@@ -1,4 +1,5 @@
 FROM python:alpine
+WORKDIR /app
 COPY requirements.txt .
 COPY mqtt2SQL.py .
 RUN pip install -r requirements.txt
